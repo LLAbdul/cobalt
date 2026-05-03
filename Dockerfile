@@ -18,7 +18,8 @@ FROM base AS api
 WORKDIR /app
 
 COPY --from=build --chown=node:node /prod/api /app
-COPY --from=build --chown=node:node /app/.git /app/.git
+# .git not available on Render — skip version info
+COPY --from=build --chown=node:node /app/package.json /app/package.json
 
 USER node
 
