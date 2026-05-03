@@ -18,8 +18,14 @@ FROM base AS api
 WORKDIR /app
 
 COPY --from=build --chown=node:node /prod/api /app
-# .git not available on Render — skip version info
 COPY --from=build --chown=node:node /app/package.json /app/package.json
+
+# Create minimal .git so version-info module doesn't crash
+RUN mkdir -p /app/.git/logs && \
+    echo "ref: refs/heads/main" > /app/.git/HEAD && \
+    echo "0000000000000000000000000000000000000000 0000000000000000000000000000000000000000 deploy $(date +%s) +0000	init" > /app/.git/logs/HEAD && \
+    printf "[remote \"origin\"]\n\turl = https://github.com/imputnet/cobalt.git\n" > /app/.git/config && \
+    chown -R node:node /app/.git
 
 USER node
 
